@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+
+	<head lang="en">
+		<meta charset="UTF-8">
+		<title>Login</title>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<meta name="format-detection" content="telephone=no">
+		<meta name="renderer" content="webkit">
+		<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+		<link rel="stylesheet" href="static/css/amazeui.css" />
+		<link href="static/css/dlstyle.css" rel="stylesheet" type="text/css">
+		<link rel="stylesheet" href="static/css/bootstrap.min.css" />	
+	</head>
+
+	<body>
+
+		<div class="login-boxtitle" style="height: 100px;">
+			<div class="logoBig">
+				<img src="static/images/logo.png" style="margin-left: 0px ; height: 100px;">
+			</div>
+		</div>
+
+		<div class="login-banner" id="loginContainer">
+			<div class="login-main" >
+				<div class="login-banner-bg"><span></span><img src="static/images/big.jpg" /></div>
+				<div class="login-box" style="margin-top: 20px;">
+
+					<h3 class="title">Login</h3>
+					<h5 style="color:red" id="tips">{{tips}}</h5>
+
+					<div class="clear"></div>
+
+					<div class="login-form"  style="background: none; margin-top: 15px;">
+						<form>
+							<div class="user-name"  style="margin-top: 20px;">
+								<label for="user"><span class="glyphicon glyphicon-user" aria-hidden="true"></span></label>
+								<input type="text" name="" id="user" v-model="username" placeholder="email/phone/username" @keyup="checkInfo">
+							</div>
+							<div class="user-pass"  style="margin-top: 20px;">
+								<label for="password"><span class="glyphicon glyphicon-lock" aria-hidden="true"></span></label>
+								<input type="password" name="" v-model="password" id="password" placeholder="password" @keyup="checkInfo">
+							</div>
+						</form>
+					</div>
+
+					<div class="login-links" >
+						<label for="remember-me"><input id="remember-me" type="checkbox"> remember me</label>
+						<br />
+					</div>
+					<div class="am-cf">
+						<input type="submit" @click="doSubmit" id="submitBtn" name="" value="Login" class="am-btn am-btn-primary am-btn-sm">
+					</div>
+					<div class="am-cf">
+						<input type="button" onclick="javascript:window.location.href='register.html'" value="create an account" class="am-btn am-btn-default am-btn-sm">
+					</div>
+					<div class="partner">
+						
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+		<div class="footer ">
+			<div class="footer-hd ">
+
+			</div>
+			<div class="footer-bd ">
+				<p>
+					<a href="# ">contact us</a><br/>
+					<a href="# ">website map</a>
+				</p>
+			</div>
+		</div>
+		<script type="text/javascript" src="static/js/jquery-1.9.min.js"></script>
+		<script type="text/javascript" src="static/js/cookie_utils.js"></script>
+		<script type="text/javascript" src="static/js/vue.js"></script>
+		<script type="text/javascript" src="static/js/axios.min.js" ></script>
+		<script type="text/javascript">
+			var baseUrl = "http://localhost:8080/";
+			var vm = new Vue({
+				el:"#loginContainer",
+				data:{
+					username:"",
+					password:"",
+					tips:"",
+					isRight:false,
+					// returnUrl:null,
+					// pid:0,
+					// sid:0,
+					// num:1
+				},
+				// created:function(){
+				// 	//1.当从商品详情页跳转到登录页面的时候，获取并显示提示信息（url）
+				// 	this.tips = getUrlParam("tips");
+					
+				// 	//2.获取到returnUrl 、 pid 、sid
+				// 	this.returnUrl = getUrlParam("returnUrl");
+				// 	this.pid = getUrlParam("pid");
+				// 	this.sid = getUrlParam("sid");
+				// 	this.num = getUrlParam("num");
+				// },
+				methods:{
+					doSubmit:function(){
+						if(vm.isRight){
+							var url = baseUrl+"user/login";
+							axios.get(url,{
+								params:{
+									username:vm.username,
+									password:vm.password
+								}
+							}).then((res)=>{
+								//get data
+								var vo = res.data;
+								console.log(vo);
+								if(vo.code == 0){
+									vm.tips = "success！";
+									//如果登录成功，就把token存储到cookie
+									setCookieValue("token",vo.msg);
+									//将用户昵称和用户头像的路径保存在cookie
+									setCookieValue("userId",vo.data.userId);
+									setCookieValue("username",vo.data.username);
+									setCookieValue("userImg",vo.data.profilphoto);
+									
+									// if(this.returnUrl == null){
+									// 	window.location.href = "index.html";
+									// }else{
+									// 	this.returnUrl = this.returnUrl+"?m="+Math.random();
+									// 	if(this.pid != null){
+									// 		this.returnUrl = this.returnUrl +"&pid="+this.pid
+									// 	}
+									// 	if(this.sid != null){
+									// 		this.returnUrl = this.returnUrl +"&sid="+this.sid
+									// 	}
+									// 	if(this.num != null){
+									// 		this.returnUrl = this.returnUrl +"&num="+this.num
+									// 	}
+									// 	window.location.href = this.returnUrl;
+									// }
+									setTimeout(function(){
+										window.location.href="index.html";
+									},1500)
+								}else{
+									vm.tips = "username or password is incorrect！";
+								}
+							});
+							
+						}else{
+							vm.tips = "Please input the username and password！";
+						}
+					},
+					checkInfo:function(){
+						if(vm.username == ""){
+							vm.tips = "Please input the username！";
+							vm.isRight = false;
+						}else if(vm.username.length<3 || vm.username.length>20){
+							vm.tips = "The length of username must be 3-20！";
+							vm.isRight = false;
+						}else{
+							//账号合法，校验密码
+							if(vm.password == ""){
+								vm.tips = "Please input password！";
+								vm.isRight = false;
+							}else if(vm.password.length<6 || vm.password.length>16){
+								vm.tips = "The length of password must be 6-16！";
+								vm.isRight = false;
+							}else{
+								vm.tips ="";
+								vm.isRight = true;
+							}
+						}
+					}
+				}
+			});
+
+		</script>
+	</body>
+
+</html>
